@@ -72,14 +72,14 @@ async fn test_image_processing_and_thumbnail() {
 
 #[tokio::test]
 async fn test_pdf_processing_text_extraction() {
-    let pdf_data = create_test_pdf("DokterV Hello World MediaVault");
+    let pdf_data = create_test_pdf("Invoice Statement Hello World MediaVault");
     assert!(!pdf_data.is_empty());
 
     let meta = mediavault::processor::pdf::process_pdf(&pdf_data).expect("PDF process failed");
     assert_eq!(meta.total_pages, 1);
     assert!(meta.extracted_text.is_some());
     let text = meta.extracted_text.unwrap();
-    assert!(text.contains("DokterV") || text.contains("Hello"));
+    assert!(text.contains("Invoice") || text.contains("Hello"));
 }
 
 #[tokio::test]

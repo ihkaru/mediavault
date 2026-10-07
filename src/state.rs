@@ -2,6 +2,7 @@ use crate::{
     config::Config,
     db::DbPool,
     search::MeiliClient,
+    services::MediaService,
     storage::DynStorage,
 };
 use std::sync::Arc;
@@ -12,6 +13,7 @@ pub struct AppState {
     pub db: DbPool,
     pub storage: DynStorage,
     pub search: Arc<MeiliClient>,
+    pub media: Arc<MediaService>,
 }
 
 impl AppState {
@@ -21,11 +23,21 @@ impl AppState {
         storage: DynStorage,
         search: MeiliClient,
     ) -> Self {
+        let config = Arc::new(config);
+        let search = Arc::new(search);
+        let media_service = Arc::new(MediaService::new(
+            config.clone(),
+            db.clone(),
+            storage.clone(),
+            search.clone(),
+        ));
+
         Self {
-            config: Arc::new(config),
+            config,
             db,
             storage,
-            search: Arc::new(search),
+            search,
+            media: media_service,
         }
     }
 }

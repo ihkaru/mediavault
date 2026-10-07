@@ -1,7 +1,7 @@
 # 🦀 MediaVault (`mediavault`)
 
 > **Blazing-Fast, Memory-Safe, 100% Pure-Rust Media & Document Hub with Resumable Uploads & Instant Search.**  
-> Dirancang khusus untuk arsitektur multi-aplikasi (Dokter V / SIPEDAS, AINA, WhatsApp Bots, Mobile & Web Apps) dengan deployment otomatis di **Coolify** via **GitHub App**.
+> Dirancang untuk arsitektur multi-aplikasi (SaaS, Microservices, Mobile & Web Apps) dengan deployment otomatis di **Coolify** via **GitHub App**.
 
 ---
 
@@ -30,7 +30,7 @@
 
 ```mermaid
 flowchart TD
-    Client["Client Applications\n(Dokter V, AINA, Bots, Web/Mobile)"]
+    Client["Client Applications\n(SaaS Apps, Web/Mobile, Microservices)"]
 
     subgraph CoolifyStack ["Coolify Production Stack (Docker Compose)"]
         MediaVault["MediaVault API (Axum / Rust)\n:8080"]
@@ -68,7 +68,7 @@ Di menu **Environment Variables** Coolify, tambahkan variabel berikut:
 ```dotenv
 # Port & Network
 PORT=8080
-API_KEY=rahasia_master_api_key_anda
+API_KEY=mv_live_secret_key_change_me
 
 # Storage Backend: 'local' atau 's3' (jika menggunakan container garage)
 STORAGE_BACKEND=local
@@ -76,11 +76,11 @@ MAX_UPLOAD_SIZE_MB=250
 
 # Meilisearch Integration
 MEILI_ENABLED=true
-MEILI_MASTER_KEY=meili_rahasia_123456
+MEILI_MASTER_KEY=meili_master_key_123456
 ```
 
 ### Langkah 3: Konfigurasi Domain & SSL
-1. Di tab **General**, isi **FQDN** (contoh: `https://vault.domainanda.my.id`).
+1. Di tab **General**, isi **FQDN** (contoh: `https://vault.yourdomain.com`).
 2. Coolify + Traefik akan otomatis membuat sertifikat SSL Let's Encrypt gratis.
 
 ### Langkah 4: Aktifkan Auto-Deploy
@@ -96,11 +96,11 @@ MEILI_MASTER_KEY=meili_rahasia_123456
 Mendukung upload gambar, dokumen PDF, spreadsheet, atau file biner lainnya.
 
 ```bash
-curl -X POST "https://vault.domainanda.my.id/api/v1/files/upload" \
-  -H "X-API-Key: rahasia_master_api_key_anda" \
-  -H "X-App-ID: dokter_v" \
-  -F "file=@/path/to/dokumen_kontrak.pdf" \
-  -F "tags=kontrak,spk,oktober2026"
+curl -X POST "https://vault.yourdomain.com/api/v1/files/upload" \
+  -H "X-API-Key: mv_live_secret_key_change_me" \
+  -H "X-App-ID: billing_service" \
+  -F "file=@/path/to/invoice_q3.pdf" \
+  -F "tags=invoice,financial,q3"
 ```
 
 **Response (`201 Created`):**
@@ -109,15 +109,15 @@ curl -X POST "https://vault.domainanda.my.id/api/v1/files/upload" \
   "success": true,
   "data": {
     "id": "b182cb94-82a1-409b-8be2-fc8e33cb3582",
-    "app_id": "dokter_v",
-    "filename": "dokumen_kontrak.pdf",
+    "app_id": "billing_service",
+    "filename": "invoice_q3.pdf",
     "mime_type": "application/pdf",
     "file_size": 245100,
     "sha256": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
     "has_thumbnail": false,
     "download_url": "/api/v1/files/b182cb94-82a1-409b-8be2-fc8e33cb3582/raw",
     "thumbnail_url": null,
-    "tags": ["kontrak", "spk", "oktober2026"],
+    "tags": ["invoice", "financial", "q3"],
     "created_at": "2026-10-08T02:50:00Z"
   }
 }
@@ -130,27 +130,27 @@ Gunakan metode ini untuk file berukuran besar agar upload dapat dilanjutkan jika
 
 #### Langkah A: Inisialisasi Sesi
 ```bash
-curl -X POST "https://vault.domainanda.my.id/api/v1/files/resumable" \
-  -H "X-API-Key: rahasia_master_api_key_anda" \
+curl -X POST "https://vault.yourdomain.com/api/v1/files/resumable" \
+  -H "X-API-Key: mv_live_secret_key_change_me" \
   -H "Content-Type: application/json" \
   -d '{
-    "filename": "laporan_tahunan.pdf",
+    "filename": "quarterly_financial_report.pdf",
     "total_size": 52428800,
-    "app_id": "sipedas"
+    "app_id": "analytics_service"
   }'
 ```
 *Mengembalikan Header `Location: /api/v1/files/resumable/<session_id>` dan `Upload-Offset: 0`.*
 
 #### Langkah B: Cek Offset Sesi (HEAD)
 ```bash
-curl -I -X HEAD "https://vault.domainanda.my.id/api/v1/files/resumable/<session_id>" \
-  -H "X-API-Key: rahasia_master_api_key_anda"
+curl -I -X HEAD "https://vault.yourdomain.com/api/v1/files/resumable/<session_id>" \
+  -H "X-API-Key: mv_live_secret_key_change_me"
 ```
 
 #### Langkah C: Kirim Chunk Data (PATCH)
 ```bash
-curl -X PATCH "https://vault.domainanda.my.id/api/v1/files/resumable/<session_id>" \
-  -H "X-API-Key: rahasia_master_api_key_anda" \
+curl -X PATCH "https://vault.yourdomain.com/api/v1/files/resumable/<session_id>" \
+  -H "X-API-Key: mv_live_secret_key_change_me" \
   -H "Upload-Offset: 0" \
   --data-binary "@/path/to/chunk_part_1"
 ```
@@ -163,8 +163,8 @@ Mencari file berdasarkan nama, kata kunci di dalam teks PDF yang diekstrak, atau
 
 ```bash
 # Pencarian instan teks bebas
-curl -X GET "https://vault.domainanda.my.id/api/v1/search?q=susenas&app_id=dokter_v" \
-  -H "X-API-Key: rahasia_master_api_key_anda"
+curl -X GET "https://vault.yourdomain.com/api/v1/search?q=invoice&app_id=billing_service" \
+  -H "X-API-Key: mv_live_secret_key_change_me"
 ```
 
 **Response:**
@@ -176,22 +176,22 @@ curl -X GET "https://vault.domainanda.my.id/api/v1/search?q=susenas&app_id=dokte
     "hits": [
       {
         "id": "b182cb94-82a1-409b-8be2-fc8e33cb3582",
-        "app_id": "dokter_v",
-        "filename": "dokumen_kontrak.pdf",
+        "app_id": "billing_service",
+        "filename": "invoice_q3.pdf",
         "mime_type": "application/pdf",
         "file_size": 245100,
         "sha256": "4b227777d4dd1fc61...",
         "has_thumbnail": false,
         "thumbnail_url": null,
         "download_url": "/api/v1/files/b182cb94-82a1-409b-8be2-fc8e33cb3582/raw",
-        "tags": ["kontrak", "spk", "oktober2026"],
-        "snippet": "...Surat Perjanjian Kerja Kegiatan SUSENAS September 2026 antara Pejabat Pembuat Komitmen...",
+        "tags": ["invoice", "financial", "q3"],
+        "snippet": "...Quarterly Financial Invoice Statement for Fiscal Period 2026...",
         "created_at": "2026-10-08T02:50:00Z"
       }
     ],
     "estimated_total_hits": 1,
     "processing_time_ms": 4,
-    "query": "susenas",
+    "query": "invoice",
     "limit": 20,
     "offset": 0
   }
@@ -209,35 +209,35 @@ curl -X GET "https://vault.domainanda.my.id/api/v1/search?q=susenas&app_id=dokte
 
 ## 💻 Integrasi dari Berbagai Bahasa Pemrograman
 
-### Integrasi Laravel / PHP (Dokter V / SIPEDAS)
+### Integrasi Laravel / PHP
 ```php
 use Illuminate\Support\Facades\Http;
 
 $response = Http::withHeaders([
     'X-API-Key' => config('services.mediavault.key'),
-    'X-App-ID'  => 'dokter_v',
+    'X-App-ID'  => 'billing_service',
 ])->attach(
     'file', file_get_contents($uploadedFile->getRealPath()), $uploadedFile->getClientOriginalName()
-)->post('https://vault.domainanda.my.id/api/v1/files/upload', [
-    'tags' => 'mitra,spk,oktober',
+)->post('https://vault.yourdomain.com/api/v1/files/upload', [
+    'tags' => 'invoice,report,2026',
 ]);
 
 $media = $response->json()['data'];
-// Simpan $media['id'] atau $media['download_url'] ke tabel database aplikasi Anda
+// Simpan $media['id'] atau $media['download_url'] ke database aplikasi Anda
 ```
 
-### Integrasi TypeScript / Bun (AINA / Bots)
+### Integrasi TypeScript / Bun / Node.js
 ```typescript
-const file = Bun.file("scan_ktp.jpg");
+const file = Bun.file("company_logo.png");
 const formData = new FormData();
-formData.append("file", file, "scan_ktp.jpg");
-formData.append("tags", "ktp,mitra");
+formData.append("file", file, "company_logo.png");
+formData.append("tags", "branding,logo");
 
-const res = await fetch("https://vault.domainanda.my.id/api/v1/files/upload", {
+const res = await fetch("https://vault.yourdomain.com/api/v1/files/upload", {
   method: "POST",
   headers: {
     "X-API-Key": process.env.MEDIAVAULT_API_KEY!,
-    "X-App-ID": "aina",
+    "X-App-ID": "marketing_app",
   },
   body: formData,
 });
@@ -273,4 +273,4 @@ cargo run
 ---
 
 ## 📄 Lisensi
-MIT License © 2026 Ihza Karunia & Tim Pengembang.
+MIT License © 2026 MediaVault Contributors.
