@@ -85,6 +85,8 @@ services:
 
   garage:
     image: dxflrs/garage:v1.0.1
+    profiles:
+      - s3
     container_name: ${GARAGE_CONTAINER_NAME:-mediavault-garage}
     restart: unless-stopped
     security_opt:
